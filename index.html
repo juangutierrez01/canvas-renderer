@@ -10,6 +10,36 @@
 const canvas = document.querySelector("canvas");
 const context = canvas.getContext("2d");
 
+const V = {
+  magnitude: function(v) {
+    return Math.hypot(v[0], v[1], v[2]);
+  },
+
+  dot: function(v1, v2) {
+    return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
+  },
+
+  angle: function(v1, v2) {
+    return Math.acos(this.dot(v1, v2) / (this.magnitude(v1) * this.magnitude(v2)))
+  },
+
+  difference: function(v1, v2) {
+    return [v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2]];
+  },
+
+  scaled: function(v, s) {
+    return [s*v[0], s*v[1], s*v[2]];
+  },
+
+  unit: function(v) {
+    return this.scaled(v, 1 / this.magnitude(v));
+  },
+
+  projection: function(v1, v2) {
+    return this.scaled(v2, this.dot(v1, v2) / Math.pow(this.magnitude(v2), 2));
+  }
+}
+
 const points = [
   [-1, -1, -1],
   [-1, 1, -1],
@@ -43,32 +73,26 @@ const camera = {
   up: [0, 0, 1],
   right: [1, 0, 0],
   fieldOfView: 5 * Math.PI / 9,
-  calculateScreenPosition: function(point) {
+  screenPosition: function(point) {
     const d = this.direction;
     const up = this.up;
     const ri = this.right;
     const fov = this.fieldOfView;
-    const v = [
-      point[0] - this.position[0],
-      point[1] - this.position[1],
-      point[2] - this.position[2]
-    ];
+    const v = V.difference(point, this.position); 
 
-    const dotProduct = d[0]*v[0] + d[1]*v[1] + d[2]*v[2];
-    const projection = [
-      v[0] - d[0]*dotProduct,
-      v[1] - d[1]*dotProduct,
-      v[2] - d[2]*dotProduct,
-    ];
-
-    const visualAngle = Math.acos(dotProduct / Math.hypot(v[0], v[1], v[2])) * 2;
+    const dotProduct = V.dot(d, v);
+    const projection = V.difference(v, V.projection(v, d));
+    const visualAngle = V.angle(d, v) * 2;
     const canvasRadius = Math.max(canvas.width, canvas.height) / 2;
 
     const p = projection;
-    const hypot = Math.hypot(p[0], p[1], p[2]) || 1;
+    const hypot = V.magnitude(p) || 1;
+
+    const x = (visualAngle / fov) * canvasRadius * V.dot(p, ri) / hypot;
+    const y = (visualAngle / fov) * canvasRadius * V.dot(p, up) / hypot;
     return [
-      (canvas.width / 2) + (visualAngle / fov) * canvasRadius * (p[0]*ri[0] + p[1]*ri[1] + p[2]*ri[2]) / hypot,
-      (canvas.height / 2) + (visualAngle / fov) * canvasRadius * (p[0]*up[0] + p[1]*up[1] + p[2]*up[2]) / hypot
+      (canvas.width / 2) + x,
+      (canvas.height / 2) + y 
     ]
   }
 };
@@ -136,7 +160,7 @@ window.requestAnimationFrame(function draw() {
 
   context.fillStyle = "black";
   for (const point of points) {
-    const [x, y] = camera.calculateScreenPosition(point);
+    const [x, y] = camera.screenPosition(point);
     context.fillRect(x - 5, y - 5, 10, 10);
   }
 });
