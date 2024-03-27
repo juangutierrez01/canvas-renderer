@@ -19,8 +19,16 @@ const V = {
     return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
   },
 
+  cos: function(v1, v2) {
+    return this.dot(v1, v2) / (this.magnitude(v1) * this.magnitude(v2));
+  },
+
   angle: function(v1, v2) {
-    return Math.acos(this.dot(v1, v2) / (this.magnitude(v1) * this.magnitude(v2)))
+    return Math.acos(this.cos(v1, v2));
+  },
+
+  scalarProjection: function(v1, v2) {
+    return this.dot(v1, v2) / this.magnitude(v2);
   },
 
   difference: function(v1, v2) {
@@ -41,6 +49,7 @@ const V = {
 }
 
 const points = [
+  [0, 0, 0],
   [-1, -1, -1],
   [-1, 1, -1],
   [1, 1, -1],
@@ -72,33 +81,38 @@ const camera = {
   direction: [0, 1, 0],
   up: [0, 0, 1],
   right: [1, 0, 0],
-  fieldOfView: 5 * Math.PI / 9,
+  fieldOfView: 110 * Math.PI / 180,
+  linearPerspective: function(point) {
+    point = V.difference(point, this.position);
+
+    if (V.scalarProjection(point, this.direction) <= 0) {
+      return [Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY];
+    }
+
+    point = V.scaled(point, 1 / V.dot(point, this.direction));
+    const fovScale = Math.tan(this.fieldOfView / 2);
+    const x = V.scalarProjection(point, this.right) / fovScale;
+    const y = V.scalarProjection(point, this.up) / fovScale;
+
+    return [x, y];
+  },
+  sphericalPerspective: function(point) {
+    point = V.difference(point, this.position);
+
+    const visualAngle = V.angle(this.direction, point) * 2;
+    const screenRadius = (visualAngle / this.fieldOfView);
+
+    const projection = V.difference(point, V.projection(point, this.direction));
+
+    const x = screenRadius * V.cos(projection, this.right);
+    const y = screenRadius * V.cos(projection, this.up);
+
+    return [x, y];
+  },
   screenPosition: function(point) {
-    const d = this.direction;
-    const up = this.up;
-    const ri = this.right;
-    const fov = this.fieldOfView;
-    const v = V.difference(point, this.position); 
-
-    const dotProduct = V.dot(d, v);
-    const projection = V.difference(v, V.projection(v, d));
-    const visualAngle = V.angle(d, v) * 2;
-    const canvasRadius = Math.max(canvas.width, canvas.height) / 2;
-
-    const p = projection;
-    const hypot = V.magnitude(p) || 1;
-
-    const x = (visualAngle / fov) * canvasRadius * V.dot(p, ri) / hypot;
-    const y = (visualAngle / fov) * canvasRadius * V.dot(p, up) / hypot;
-    return [
-      (canvas.width / 2) + x,
-      (canvas.height / 2) + y 
-    ]
+    return this.linearPerspective(point);
   }
 };
-
-let horizontal = 0;
-let vertical = 0;
 
 window.addEventListener("resize", (function resizeCanvas() {
     canvas.width = document.documentElement.clientWidth;
@@ -106,19 +120,24 @@ window.addEventListener("resize", (function resizeCanvas() {
     return resizeCanvas;
 })());
 
+let leftPressed = 0;
+let rightPressed = 0;
+let upPressed = 0;
+let downPressed = 0;
+
 window.addEventListener("keydown", (event) => {
   switch (event.code) {
     case "KeyW":
-      vertical = 1;
+      upPressed = 1;
       break;
     case "KeyA":
-      horizontal = -1;
+      leftPressed = 1;
       break;
     case "KeyS":
-      vertical = -1;
+      downPressed = 1;
       break;
     case "KeyD":
-      horizontal = 1;
+      rightPressed = 1;
       break;
     default:
       break;
@@ -128,16 +147,16 @@ window.addEventListener("keydown", (event) => {
 window.addEventListener("keyup", (event) => {
   switch (event.code) {
     case "KeyW":
-      vertical = 0;
+      upPressed = 0;
       break;
     case "KeyA":
-      horizontal = 0;
+      leftPressed = 0;
       break;
     case "KeyS":
-      vertical = 0;
+      downPressed = 0;
       break;
     case "KeyD":
-      horizontal = 0;
+      rightPressed = 0;
       break;
     default:
       break;
@@ -145,23 +164,31 @@ window.addEventListener("keyup", (event) => {
 });
 
 window.addEventListener("blur", (event) => {
-  horizontal = 0;
-  vertical = 0;
+  upPressed = 0;
+  leftPressed = 0;
+  downPressed = 0;
+  rightPressed = 0;
 });
 
 window.requestAnimationFrame(function draw() {
   window.requestAnimationFrame(draw);
-
-  camera.position[0] += horizontal * 0.03;
-  camera.position[1] += vertical * 0.03;
+  const canvasRadius = Math.max(canvas.width, canvas.height) / 2;
+  const speed = 0.02;
+  camera.position[0] += (rightPressed - leftPressed) * speed;
+  camera.position[1] += (upPressed - downPressed) * speed;
   
-  context.fillStyle = "white";
+  context.fillStyle = "cornflowerblue";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
-  context.fillStyle = "black";
+  context.fillStyle = "oldlace";
   for (const point of points) {
     const [x, y] = camera.screenPosition(point);
-    context.fillRect(x - 5, y - 5, 10, 10);
+    context.fillRect(
+      (canvas.width / 2) + canvasRadius*x - 5,
+      (canvas.height / 2) + canvasRadius*y - 5,
+      10,
+      10
+    );
   }
 });
 /****************************************************************************/
