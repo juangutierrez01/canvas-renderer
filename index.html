@@ -31,12 +31,36 @@ const V = {
     return this.dot(v1, v2) / this.magnitude(v2);
   },
 
+  sum: function(v1, v2) {
+    return [v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]];
+  },
+
   difference: function(v1, v2) {
     return [v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2]];
   },
 
   scaled: function(v, s) {
     return [s*v[0], s*v[1], s*v[2]];
+  },
+
+  cross: function(v1, v2) {
+    return [
+      v1[1]*v2[2] - v1[2]*v2[1],
+      v1[2]*v2[0] - v1[0]*v2[2],
+      v1[0]*v2[1] - v1[1]*v2[0]
+    ];
+  },
+
+  normal: function(v1, v2) {
+    return this.unit(this.cross(v1, v2));
+  },
+
+  // 0 <= s < PI/2
+  rotation: function(v1, v2, s) {
+    const normal = this.scaled(this.normal(v1, v2), Math.tan(s));
+    const sum = this.sum(v1, normal);
+
+    return this.scaled(sum, this.magnitude(v1) * Math.cos(s));
   },
 
   unit: function(v) {
@@ -47,6 +71,8 @@ const V = {
     return this.scaled(v2, this.dot(v1, v2) / Math.pow(this.magnitude(v2), 2));
   }
 }
+
+console.log(V.rotation([1, 0, 0], [0, 1, 0], Math.PI/4));
 
 const points = [
   [0, 0, 0],
