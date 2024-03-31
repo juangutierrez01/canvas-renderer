@@ -76,6 +76,7 @@ console.log(V.rotation([1, 0, 0], [0, 1, 0], Math.PI/4));
 
 const points = [
   [0, 0, 0],
+  [0, 0, 4],
   [-1, -1, -1],
   [-1, 1, -1],
   [1, 1, -1],
@@ -111,7 +112,7 @@ const camera = {
   linearPerspective: function(point) {
     point = V.difference(point, this.position);
 
-    if (V.scalarProjection(point, this.direction) <= 0) {
+    if (V.dot(point, this.direction) <= 0) {
       return [Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY];
     }
 
@@ -136,7 +137,7 @@ const camera = {
     return [x, y];
   },
   screenPosition: function(point) {
-    return this.linearPerspective(point);
+    return this.sphericalPerspective(point);
   }
 };
 
@@ -146,21 +147,29 @@ window.addEventListener("resize", (function resizeCanvas() {
     return resizeCanvas;
 })());
 
-let leftPressed = 0;
-let rightPressed = 0;
 let upPressed = 0;
 let downPressed = 0;
+let leftPressed = 0;
+let rightPressed = 0;
+let forwardPressed = 0;
+let backwardPressed = 0;
 
 window.addEventListener("keydown", (event) => {
   switch (event.code) {
-    case "KeyW":
+    case "KeyQ":
+      downPressed = 1;
+      break;
+    case "KeyE":
       upPressed = 1;
+      break;
+    case "KeyW":
+      forwardPressed = 1;
       break;
     case "KeyA":
       leftPressed = 1;
       break;
     case "KeyS":
-      downPressed = 1;
+      backwardPressed = 1;
       break;
     case "KeyD":
       rightPressed = 1;
@@ -172,14 +181,20 @@ window.addEventListener("keydown", (event) => {
 
 window.addEventListener("keyup", (event) => {
   switch (event.code) {
-    case "KeyW":
+    case "KeyQ":
+      downPressed = 0;
+      break;
+    case "KeyE":
       upPressed = 0;
+      break;
+    case "KeyW":
+      forwardPressed = 0;
       break;
     case "KeyA":
       leftPressed = 0;
       break;
     case "KeyS":
-      downPressed = 0;
+      backwardPressed = 0;
       break;
     case "KeyD":
       rightPressed = 0;
@@ -191,8 +206,10 @@ window.addEventListener("keyup", (event) => {
 
 window.addEventListener("blur", (event) => {
   upPressed = 0;
-  leftPressed = 0;
   downPressed = 0;
+  forwardPressed = 0;
+  leftPressed = 0;
+  backwardPressed = 0;
   rightPressed = 0;
 });
 
@@ -201,7 +218,8 @@ window.requestAnimationFrame(function draw() {
   const canvasRadius = Math.max(canvas.width, canvas.height) / 2;
   const speed = 0.02;
   camera.position[0] += (rightPressed - leftPressed) * speed;
-  camera.position[1] += (upPressed - downPressed) * speed;
+  camera.position[1] += (forwardPressed - backwardPressed) * speed;
+  camera.position[2] += (upPressed - downPressed) * speed;
   
   context.fillStyle = "cornflowerblue";
   context.fillRect(0, 0, canvas.width, canvas.height);
@@ -211,7 +229,7 @@ window.requestAnimationFrame(function draw() {
     const [x, y] = camera.screenPosition(point);
     context.fillRect(
       (canvas.width / 2) + canvasRadius*x - 5,
-      (canvas.height / 2) + canvasRadius*y - 5,
+      (canvas.height / 2) - canvasRadius*y - 5,
       10,
       10
     );
