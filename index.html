@@ -31,6 +31,7 @@ const V = {
     return Math.acos(this.cos(v1, v2));
   },
 
+  // The signed magnitude of the projection of v1 onto v2
   scalarProjection: function(v1, v2) {
     return this.dot(v1, v2) / this.nonZeroMagnitude(v2);
   },
@@ -39,6 +40,7 @@ const V = {
     return [v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]];
   },
 
+  // The sum of v1 and the opposite of v2 (v1-v2)
   difference: function(v1, v2) {
     return [v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2]];
   },
@@ -47,6 +49,7 @@ const V = {
     return [s*v[0], s*v[1], s*v[2]];
   },
 
+  // The cross product of v1 and v2 (v1×V2)
   cross: function(v1, v2) {
     return [
       v1[1]*v2[2] - v1[2]*v2[1],
@@ -55,10 +58,12 @@ const V = {
     ];
   },
 
+  // Unit normal vector attained from v1×v2 
   normal: function(v1, v2) {
     return this.unit(this.cross(v1, v2));
   },
 
+  // Rotation of vector v1 about plane v2 by amount s
   rotation: function(v1, v2, s) {
     s %= Math.PI;
 
@@ -85,6 +90,7 @@ const V = {
     return this.scaled(v, 1 / this.nonZeroMagnitude(v));
   },
 
+  // Projection of v1 onto v2
   projection: function(v1, v2) {
     return this.scaled(v2, this.dot(v1, v2) / Math.pow(this.nonZeroMagnitude(v2), 2));
   }
