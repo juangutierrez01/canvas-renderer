@@ -93,7 +93,12 @@ const V = {
   // Projection of v1 onto v2
   projection: function(v1, v2) {
     return this.scaled(v2, this.dot(v1, v2) / Math.pow(this.nonZeroMagnitude(v2), 2));
-  }
+  },
+
+  // Projection of vector v1 onto plane v2
+  planarProjection: function(v1, v2) {
+    return this.difference(v1, this.projection(v1, v2));
+  },
 }
 
 const points = [
@@ -151,7 +156,7 @@ const camera = {
     const visualAngle = V.angle(this.direction, point) * 2;
     const screenRadius = (visualAngle / this.fieldOfView);
 
-    const projection = V.difference(point, V.projection(point, this.direction));
+    const projection = V.planarProjection(point, this.direction);
 
     const x = screenRadius * V.cos(projection, this.right);
     const y = screenRadius * V.cos(projection, this.up);
