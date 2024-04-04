@@ -67,6 +67,9 @@ const V = {
   rotation: function(v1, v2, s) {
     s %= Math.PI;
 
+    const projection = this.projection(v1, v2);
+    v1 = this.difference(v1, projection);
+
     while (s > Math.PI / 3) {
       const normal = this.scaled(this.normal(v1, v2), Math.tan(Math.PI/3));
       const sum = this.sum(this.unit(v1), normal);
@@ -83,7 +86,8 @@ const V = {
 
     const normal = this.scaled(this.normal(v1, v2), Math.tan(s));
     const sum = this.sum(this.unit(v1), normal);
-    return this.scaled(sum, this.magnitude(v1) * Math.cos(s));
+    v1 = this.scaled(sum, this.magnitude(v1) * Math.cos(s));
+    return this.sum(v1, projection);
   },
 
   unit: function(v) {
