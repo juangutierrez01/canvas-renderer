@@ -63,30 +63,25 @@ const V = {
     return this.unit(this.cross(v1, v2));
   },
 
-  // Rotation of vector v1 about plane v2 by amount s
+  // Rotation of vector v1 about unit plane v2 by amount s
   rotation: function(v1, v2, s) {
     s %= Math.PI;
 
     const projection = this.projection(v1, v2);
     v1 = this.difference(v1, projection);
 
-    while (s > Math.PI / 3) {
-      const normal = this.scaled(this.normal(v1, v2), Math.tan(Math.PI/3));
-      const sum = this.sum(this.unit(v1), normal);
-      v1 = this.scaled(sum, this.magnitude(v1) * Math.cos(Math.PI/3));
-      s -= Math.PI/3;
+    if (s < 0) {
+      v1 = this.scaled(v1, -1);
+      s += Math.PI;
     }
 
-    while (s < -Math.PI / 3) {
-      const normal = this.scaled(this.normal(v1, v2), Math.tan(-Math.PI/3));
-      const sum = this.sum(this.unit(v1), normal);
-      v1 = this.scaled(sum, this.magnitude(v1) * Math.cos(-Math.PI/3));
-      s += Math.PI/3;
+    if (s === Math.PI/2) {
+      return this.sum(this.cross(v1, v2), projection);
     }
 
-    const normal = this.scaled(this.normal(v1, v2), Math.tan(s));
-    const sum = this.sum(this.unit(v1), normal);
-    v1 = this.scaled(sum, this.magnitude(v1) * Math.cos(s));
+    const normal = this.scaled(this.cross(v1, v2), Math.tan(s));
+    const sum = this.sum(v1, normal);
+    v1 = this.scaled(sum, Math.cos(s));
     return this.sum(v1, projection);
   },
 
@@ -178,7 +173,6 @@ const camera = {
   rotateVertically: function(angle) {
     this.direction = V.unit(V.rotation(this.direction, this.right, angle));
     this.up = V.unit(V.rotation(this.up, this.right, angle));
-    this.right = V.normal(this.direction, this.up);
   }
 };
 
@@ -223,8 +217,14 @@ window.addEventListener("blur", (event) => {
   });
 });
 
-window.requestAnimationFrame(function draw() {
+let previousTime = document.timeline.currentTime;
+let elapsedTime = 0;
+
+window.requestAnimationFrame(function draw(currentTime) {
   window.requestAnimationFrame(draw);
+  elapsedTime = currentTime - previousTime;
+  previousTime = currentTime;
+
   const canvasRadius = Math.max(canvas.width, canvas.height) / 2;
   const movementSpeed = 0.03;
   const rotationSpeed = Math.PI/180;
@@ -233,8 +233,7 @@ window.requestAnimationFrame(function draw() {
   camera.position = V.sum(camera.position, V.scaled(camera.up, (keyMap.get("Space") * (-2*keyMap.get("Shift") + 1)) * movementSpeed));
   camera.rotateHorizontally((keyMap.get("ArrowRight") - keyMap.get("ArrowLeft")) * rotationSpeed);
   camera.rotateVertically((keyMap.get("ArrowDown") - keyMap.get("ArrowUp")) * rotationSpeed);
-  console.log(Math.round(camera.direction[0] * 100)/100, Math.round(camera.direction[1] * 100)/100, Math.round(camera.direction[2] * 100)/100);
-  
+
   context.fillStyle = "cornflowerblue";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
