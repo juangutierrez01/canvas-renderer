@@ -134,6 +134,7 @@ const camera = {
   direction: [0, 1, 0],
   up: [0, 0, 1],
   right: [1, 0, 0],
+  GLOBAL_UP: [0, 0, 1],
   fieldOfView: 110 * Math.PI / 180,
   linearPerspective: function(point) {
     point = V.difference(point, this.position);
@@ -166,8 +167,8 @@ const camera = {
     return this.linearPerspective(point);
   },
   rotateHorizontally: function(angle) {
-    this.direction = V.unit(V.rotation(this.direction, [0, 0, 1], angle));
-    this.up = V.unit(V.rotation(this.up, [0, 0, 1], angle));
+    this.direction = V.unit(V.rotation(this.direction, this.GLOBAL_UP, angle));
+    this.up = V.unit(V.rotation(this.up, this.GLOBAL_UP, angle));
     this.right = V.normal(this.direction, this.up);
   },
   rotateVertically: function(angle) {
@@ -230,7 +231,7 @@ window.requestAnimationFrame(function draw(currentTime) {
   const rotationSpeed = Math.PI/180;
   camera.position = V.sum(camera.position, V.scaled(camera.direction, (keyMap.get("KeyW") - keyMap.get("KeyS")) * movementSpeed));
   camera.position = V.sum(camera.position, V.scaled(camera.right, (keyMap.get("KeyD") - keyMap.get("KeyA")) * movementSpeed));
-  camera.position = V.sum(camera.position, V.scaled(camera.up, (keyMap.get("Space") * (-2*keyMap.get("Shift") + 1)) * movementSpeed));
+  camera.position = V.sum(camera.position, V.scaled(camera.GLOBAL_UP, (keyMap.get("Space") * (-2*keyMap.get("Shift") + 1)) * movementSpeed));
   camera.rotateHorizontally((keyMap.get("ArrowRight") - keyMap.get("ArrowLeft")) * rotationSpeed);
   camera.rotateVertically((keyMap.get("ArrowDown") - keyMap.get("ArrowUp")) * rotationSpeed);
 
