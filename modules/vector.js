@@ -1,3 +1,7 @@
+/*****************************************************************************
+ * Scalar-valued Functions
+ ****************************************************************************/
+
 export function magnitude(v) {
   return Math.hypot(v[0], v[1], v[2]);
 }
@@ -22,6 +26,10 @@ export function angle(v1, v2) {
 export function scalarProjection(v1, v2) {
   return this.dot(v1, v2) / this.nonZeroMagnitude(v2);
 }
+
+/*****************************************************************************
+ * Vector-valued Functions
+ ****************************************************************************/
 
 export function sum(v1, v2) {
   return [v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]];
