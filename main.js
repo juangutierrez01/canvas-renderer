@@ -11,6 +11,20 @@ const camera = {
   right: [1, 0, 0],
   GLOBAL_UP: [0, 0, 1],
   fieldOfView: 110 * Math.PI / 180,
+  scale: 0.16,
+  orthographicPerspective: function(point) {
+    point = V.difference(point, this.position);
+
+    if (V.dot(point, this.direction) <= 0) {
+      return [Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY];
+    }
+
+    const projection = V.planarProjection(point, this.direction);
+    const x = this.scale * V.scalarProjection(point, this.right);
+    const y = this.scale * V.scalarProjection(point, this.up);
+
+    return [x, y];
+  },
   linearPerspective: function(point) {
     point = V.difference(point, this.position);
 
@@ -62,7 +76,10 @@ const keyMap = new Map([
   ["ArrowLeft", 0],
   ["ArrowRight", 0],
   ["ArrowUp", 0],
-  ["ArrowDown", 0]
+  ["ArrowDown", 0],
+  ["Digit1", 0],
+  ["Digit2", 0],
+  ["Digit3", 0]
 ]);
 
 window.addEventListener("keydown", (event) => {
@@ -105,6 +122,14 @@ window.requestAnimationFrame(function draw(currentTime) {
   camera.position = V.sum(camera.position, V.scaled(camera.GLOBAL_UP, (keyMap.get("Space") * (-2*keyMap.get("ShiftLeft") + 1)) * movementSpeed));
   camera.rotateHorizontally((keyMap.get("ArrowRight") - keyMap.get("ArrowLeft")) * rotationSpeed);
   camera.rotateVertically((keyMap.get("ArrowDown") - keyMap.get("ArrowUp")) * rotationSpeed);
+  camera.scale *= 1 + (keyMap.get("KeyW") - keyMap.get("KeyS")) * movementSpeed / 4;
+  if (keyMap.get("Digit1")) {
+    camera.screenPosition = camera.linearPerspective;
+  } else if (keyMap.get("Digit2")) {
+    camera.screenPosition = camera.sphericalPerspective;
+  } else if (keyMap.get("Digit3")) {
+    camera.screenPosition = camera.orthographicPerspective;
+  }
 
   context.fillStyle = "cornflowerblue";
   context.fillRect(0, 0, canvas.width, canvas.height);
