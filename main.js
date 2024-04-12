@@ -58,7 +58,7 @@ const keyMap = new Map([
   ["KeyS", 0],
   ["KeyD", 0],
   ["Space", 0],
-  ["Shift", 0],
+  ["ShiftLeft", 0],
   ["ArrowLeft", 0],
   ["ArrowRight", 0],
   ["ArrowUp", 0],
@@ -69,16 +69,12 @@ window.addEventListener("keydown", (event) => {
   if (keyMap.has(event.code)) {
     keyMap.set(event.code, 1);
   }
-  
-  keyMap.set("Shift", event.shiftKey ? 1 : 0);
 });
 
 window.addEventListener("keyup", (event) => {
   if (keyMap.has(event.code)) {
     keyMap.set(event.code, 0);
   }
-
-  keyMap.set("Shift", event.shiftKey ? 1 : 0);
 });
 
 window.addEventListener("blur", (event) => {
@@ -106,7 +102,7 @@ window.requestAnimationFrame(function draw(currentTime) {
   const rotationSpeed = Math.PI/180;
   camera.position = V.sum(camera.position, V.scaled(camera.direction, (keyMap.get("KeyW") - keyMap.get("KeyS")) * movementSpeed));
   camera.position = V.sum(camera.position, V.scaled(camera.right, (keyMap.get("KeyD") - keyMap.get("KeyA")) * movementSpeed));
-  camera.position = V.sum(camera.position, V.scaled(camera.GLOBAL_UP, (keyMap.get("Space") * (-2*keyMap.get("Shift") + 1)) * movementSpeed));
+  camera.position = V.sum(camera.position, V.scaled(camera.GLOBAL_UP, (keyMap.get("Space") * (-2*keyMap.get("ShiftLeft") + 1)) * movementSpeed));
   camera.rotateHorizontally((keyMap.get("ArrowRight") - keyMap.get("ArrowLeft")) * rotationSpeed);
   camera.rotateVertically((keyMap.get("ArrowDown") - keyMap.get("ArrowUp")) * rotationSpeed);
 
