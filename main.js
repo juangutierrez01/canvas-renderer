@@ -1,8 +1,8 @@
 import * as V from "./modules/vector.js";
-import points from "./modules/points.js";
+import {vertices, edges} from "./modules/model.js";
 
 const canvas = window.document.querySelector("canvas");
-const context = canvas.getContext("2d");
+const context = canvas.getContext("2d", { alpha: false });
 
 const camera = {
   position: [0, -5, 0],
@@ -16,7 +16,7 @@ const camera = {
     point = V.difference(point, this.position);
 
     if (V.dot(point, this.direction) <= 0) {
-      return [Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY];
+      return [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
     }
 
     const projection = V.planarProjection(point, this.direction);
@@ -29,7 +29,7 @@ const camera = {
     point = V.difference(point, this.position);
 
     if (V.dot(point, this.direction) <= 0) {
-      return [Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY];
+      return [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
     }
 
     point = V.scaled(point, 1 / V.dot(point, this.direction));
@@ -134,14 +134,30 @@ window.requestAnimationFrame(function draw(currentTime) {
   context.fillStyle = "cornflowerblue";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
+  context.strokeStyle = "oldlace";
+  for (const edge of edges) {
+    context.beginPath();
+    let [x, y] = camera.screenPosition(vertices[edge[0]]);
+    x = (canvas.width / 2) + canvasRadius*x;
+    y = (canvas.height / 2) - canvasRadius*y;
+    context.moveTo(x, y);
+    for (let i = 1; i < edge.length; ++i) {
+      [x, y] = camera.screenPosition(vertices[edge[i]]);
+      x = (canvas.width / 2) + canvasRadius*x;
+      y = (canvas.height / 2) - canvasRadius*y;
+      context.lineTo(x, y);
+    }
+    context.stroke();
+  }
+
   context.fillStyle = "oldlace";
-  for (const point of points) {
-    const [x, y] = camera.screenPosition(point);
+  for (const vertex of vertices) {
+    const [x, y] = camera.screenPosition(vertex);
     context.fillRect(
-      (canvas.width / 2) + canvasRadius*x - 5,
-      (canvas.height / 2) - canvasRadius*y - 5,
-      10,
-      10
+      (canvas.width / 2) + canvasRadius*x - 3,
+      (canvas.height / 2) - canvasRadius*y - 3,
+      6,
+      6
     );
   }
 });
