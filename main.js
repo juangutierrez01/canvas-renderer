@@ -2,6 +2,11 @@ import * as V from "./modules/vector.js";
 import {vertices, edges} from "./modules/model.js";
 import camera from "./modules/camera.js";
 
+navigator?.serviceWorker.register(
+    "/canvas-renderer/service-worker.js",
+    { scope: "/canvas-renderer/" }
+);
+
 const canvas = window.document.querySelector("canvas");
 const context = canvas.getContext("2d", { alpha: false });
 
