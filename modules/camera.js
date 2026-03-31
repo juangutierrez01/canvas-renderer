@@ -15,7 +15,6 @@ export default {
       return [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
     }
 
-    const projection = V.planarProjection(point, this.direction);
     const x = V.scalarProjection(point, this.right) / V.magnitude(this.position);
     const y = V.scalarProjection(point, this.up) / V.magnitude(this.position);
 
