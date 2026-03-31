@@ -66,7 +66,6 @@ window.requestAnimationFrame(function draw(currentTime) {
   camera.position = V.sum(camera.position, V.scaled(camera.GLOBAL_UP, (keyMap.get("Space") * (-2*keyMap.get("ShiftLeft") + 1)) * movementSpeed));
   camera.rotateHorizontally((keyMap.get("ArrowRight") - keyMap.get("ArrowLeft")) * rotationSpeed);
   camera.rotateVertically((keyMap.get("ArrowDown") - keyMap.get("ArrowUp")) * rotationSpeed);
-  camera.scale *= 1 + (keyMap.get("KeyW") - keyMap.get("KeyS")) * movementSpeed / 4;
   if (keyMap.get("Digit1")) {
     camera.screenPosition = camera.linearPerspective;
   } else if (keyMap.get("Digit2")) {

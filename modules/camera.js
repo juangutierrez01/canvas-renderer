@@ -16,8 +16,8 @@ export default {
     }
 
     const projection = V.planarProjection(point, this.direction);
-    const x = this.scale * V.scalarProjection(point, this.right);
-    const y = this.scale * V.scalarProjection(point, this.up);
+    const x = V.scalarProjection(point, this.right) / V.magnitude(this.position);
+    const y = V.scalarProjection(point, this.up) / V.magnitude(this.position);
 
     return [x, y];
   },
