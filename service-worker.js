@@ -1,5 +1,5 @@
 const REPOSITORY = "canvas-renderer";
-const VERSION = "v3"
+const VERSION = "v4";
 const URLS = [
     "/",
     "/favicon.ico",
@@ -70,7 +70,23 @@ self.addEventListener("fetch", (event) => {
             return networkResponse;
         }
 
-        // Case 3: return from network, backed up by dynamic cache
+        // Case 3: return from any other accessible cache
+        const otherCaches = await caches.keys().then((keys) =>
+            keys.filter((key) =>
+                key !== STATIC_CACHE && key !== DYNAMIC_CACHE
+            )
+        );
+
+        for (const otherCacheName of otherCaches) {
+            const otherCache = await caches.open(otherCacheName);
+            const otherResponse = await otherCache.match(event.request);
+
+            if (otherResponse) {
+                return otherResponse;
+            }
+        }
+
+        // Case 4: return from network, backed up by dynamic cache
         const dynamicCache = await caches.open(DYNAMIC_CACHE);
         const dynamicResponse = await dynamicCache.match(event.request);
 
