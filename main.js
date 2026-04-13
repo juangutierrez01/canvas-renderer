@@ -7,6 +7,8 @@ navigator?.serviceWorker.register(
     { scope: "/canvas-renderer/" }
 );
 
+const presourcelink = window.document.querySelector(".presourcelink");
+const sourcelink = window.document.querySelector(".sourcelink");
 const canvas = window.document.querySelector("canvas");
 const context = canvas.getContext("2d", { alpha: false });
 
@@ -42,6 +44,16 @@ window.addEventListener("blur", (event) => {
   keyMap.forEach((value, key, map) => {
     map.set(key, 0);
   });
+});
+
+presourcelink.addEventListener("focusin", (event) => {
+  event.target.blur();
+});
+
+sourcelink.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    presourcelink.focus()
+  }
 });
 
 window.addEventListener("resize", (function resizeCanvas() {

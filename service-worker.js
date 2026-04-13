@@ -1,5 +1,5 @@
 const REPOSITORY = "canvas-renderer";
-const VERSION = "v4";
+const VERSION = "v5";
 const URLS = [
     "/",
     "/favicon.ico",
