@@ -8,7 +8,7 @@
   <a href="/"><img src="https://img.shields.io/badge/CSS-blue?logo=css3&logoColor=white" alt="CSS badge"></a>
 </p>
 
-A work-in-progress, fully custom 3D renderer written VanillaJS. Everything from keyboard input to perspective geometry done without external libraries. See it in action at [juangutierrez01.github.io/canvas-renderer](https://juangutierrez01.github.io/canvas-renderer/)
+A work-in-progress, fully custom 3D renderer written VanillaJS. Everything from keyboard input to perspective geometry done without external libraries. See it in action at [juangutie.github.io/canvas-renderer](https://juangutie.github.io/canvas-renderer/)
 
 ## Controls
 - Use <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to move around
